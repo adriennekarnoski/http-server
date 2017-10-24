@@ -1,23 +1,13 @@
 import pytest
 
 
-def test_shorter():
-    """."""
-    from client import client_socket
-    msg = client_socket('12345')
-    assert msg == '12345'
+def test_response_message_response():
+    from server import response_ok
+    ok_message = response_ok()
+    assert ok_message[5:20] == 'HTTP/1.1 200 OK'
 
 
-def test_longer():
-    """."""
-    from client import client_socket
-    msg = client_socket('12345678910')
-    assert msg == '12345678\910'
-
-
-def test_exact():
-    """."""
-    from client import client_socket
-    msg = client_socket('12345678')
-    assert msg == '12345678'
-
+def test_error_message_response():
+    from server import response_error
+    error_message = response_error()
+    assert error_message[5:39] == 'HTTP/1.1 500 INTERNAL SERVER ERROR'

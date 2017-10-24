@@ -8,7 +8,7 @@ import sys
 def client_socket(message):
     """Function to send messages to client."""
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(('127.0.0.1', 2000))
+    client.connect(('127.0.0.1', 2200))
     message = message + '*'
     message = u'{}'.format(message)
     client.sendall(message.encode('utf8'))
