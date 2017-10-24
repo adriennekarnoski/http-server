@@ -1,26 +1,31 @@
-"""."""
+"""Server function."""
 import socket
 
 
 def server():
     """."""
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP)
-    server.bind(('127.0.0.1', 4000))
+    server.bind(('127.0.0.1', 2000))
     server.listen(1)
+    msg = ''
+    buffer_len = 8
+    ending = False
+    conn, addr = server.accept()
 
-    while True:
-        conn, addr = server.accept()
+    while not ending:
         try:
-            data = conn.recv(10)
-            if data:
-                conn.sendall(data)
-                print(data)
-            else:
-                conn.sendall('enter valid data')
+            data = (conn.recv(buffer_len)).decode('utf8')
+            msg += data
+            if data.endswith('*'):
+                conn.sendall(msg.encode('utf8'))
+                print(msg)
+                msg = ''
+                break
         except KeyboardInterrupt:
             conn.shutdown()
             conn.close()
             break
+
 
 if __name__ == '__main__':
     try:
