@@ -15,10 +15,12 @@ def client_socket(message):
     reply_complete = False
     while not reply_complete:
         part = client.recv(buffer_length)
+        return_part = 'this is returned {}'.format(part)
         print(part.decode('utf8'))
         if len(part) < buffer_length:
             break
     client.close()
+    return return_part
 
 if __name__ == '__main__':
     client_socket(sys.argv[1])
