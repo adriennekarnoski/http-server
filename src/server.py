@@ -18,7 +18,6 @@ def server():
             data = (conn.recv(buffer_len)).decode('utf8')
             msg += data
             if data.endswith('*'):
-                # conn.sendall(msg.encode('utf8'))
                 message_return = response_ok()
                 conn.send(message_return.encode('utf8'))
                 print(message_return)
