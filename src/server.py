@@ -1,6 +1,7 @@
 """Server function."""
 import socket
 import email.utils
+import sys
 
 
 def server():
@@ -12,17 +13,21 @@ def server():
     buffer_len = 8
     ending = False
     conn, addr = server.accept()
-
+    
     while not ending:
         try:
             data = (conn.recv(buffer_len)).decode('utf8')
             msg += data
             if data.endswith('*'):
-                # conn.sendall(msg.encode('utf8'))
                 message_return = response_ok()
                 conn.send(message_return.encode('utf8'))
-                print(message_return)
-                print(msg)
+                logged_request = """
+                INCOMING REQUEST\r\n
+                REQUEST BODY: {}\r\n
+                FROM: {}\r\n
+                DATE: {}\r\n
+                """.format(msg, addr, email.utils.formatdate(usegmt=True))
+                sys.stdout.write(logged_request)
                 msg = ''
                 break
         except IndexError:
@@ -37,8 +42,8 @@ def server():
 
 def response_ok():
     send_ok_response = """
-    HTTP/1.1 200 OK<CRLF>
-    DATE: {}<CRLF>
+    HTTP/1.1 200 OK \r\n
+    DATE: {} \r\n
     """.format(email.utils.formatdate(usegmt=True))
     message = u'{}*'.format(send_ok_response)
     return message
