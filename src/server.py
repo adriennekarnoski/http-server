@@ -36,6 +36,7 @@ def server():
 
 
 def response_ok():
+    """."""
     send_ok_response = """
     HTTP/1.1 200 OK<CRLF>
     DATE: {}<CRLF>
@@ -45,6 +46,7 @@ def response_ok():
 
 
 def response_error():
+    """."""
     send_error_response = """
     HTTP/1.1 500 INTERNAL SERVER ERROR<CRLF>
      DATE: {}<CRLF>

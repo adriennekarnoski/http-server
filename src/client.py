@@ -19,7 +19,7 @@ def client_socket(message):
         part = (client.recv(buffer_length)).decode('utf8')
         msg += part
         if part.endswith('*'):
-            print(msg)
+            return msg
             msg = ''
             break
     client.close()
