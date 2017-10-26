@@ -2,37 +2,60 @@
 import socket
 import email.utils
 import sys
+import os
 
 
-def response_error(error):
+def response_error(error_code):
     """Determine and format proper response."""
+    if error_code == '405':
+        error_msg = 'METHOD NOT ALLOWED'
+    elif error_code == '505':
+        error_msg = 'HTTP VERSION NOT SUPPORTED'
+    elif error_code == '500':
+        error_msg = 'INTERNAL SERVER ERROR'
+    elif error_code == '404':
+        error_msg = 'CONTENT NOT FOUND'
     send_error_response = """
     HTTP/1.1 {}\r\n
      DATE: {}\r\n
-    """
+     ERROR: {}\r\n
+    """.format(error_code, email.utils.formatdate(usegmt=True), error_msg)
+
     message = u'{}*'.format(send_error_response)
-    if error == 'method':
-        error_code = '405 METHOD NOT ALLOWED'
-    elif error == 'protocol':
-        error_code = '505 HTTP VERSION NOT SUPPORTED'
-    elif error == 'server':
-        error_code = '500 INTERNAL SERVER ERROR'
-    return message.format(error_code, email.utils.formatdate(usegmt=True))
+    return message
 
 
 def parse_request(msg):
     """Parse the incoming msg to check for proper format, raise appropriate exception."""
     request = msg.split(' ')
-    # message_request = [request[0], request[1], request[2]]
+
     if request[0] == 'CRASH':
-        raise IOError
+        raise ValueError('500')
     elif request[0] == 'GET' and request[2] == 'HTTP/1.1':
-        message_return = response_ok(request[1])
+        uri = request[1]
+        try:
+            message_return = resolve_uri(uri)
+        except IndexError:
+            raise ValueError('404')
         return [message_return, request]
     elif request[0] != 'GET':
-        raise ValueError
+        raise ValueError('405')
     elif request[2] != 'HTTP/1.1':
-        raise IndexError
+        raise ValueError('505')
+
+
+def resolve_uri(uri):
+    """."""
+    if uri.endswith('/'):
+        if not os.path.isdir(uri):
+            raise IndexError
+        else:
+            return response_ok(uri)
+    else:
+        if not os.path.exists(uri):
+            raise IndexError
+        else:
+            return response_ok(uri)
 
 
 def server():
@@ -42,7 +65,7 @@ def server():
         socket.SOCK_STREAM,
         socket.IPPROTO_TCP
     )
-    server.bind(('127.0.0.1', 2005))
+    server.bind(('127.0.0.1', 3002))
     server.listen(1)
     msg = ''
     buffer_len = 8
@@ -57,12 +80,8 @@ def server():
                 if data.endswith('*'):
                     try:
                         message_return = parse_request(msg)[0]
-                    except ValueError:
-                        message_return = response_error('method')
-                    except IndexError:
-                        message_return = response_error('protocol')
-                    except IOError:
-                        message_return = response_error('server')
+                    except ValueError as err:
+                        message_return = response_error(err.args[0])
                     conn.send(message_return.encode('utf8'))
                     logged_request = """
                     INCOMING REQUEST\r\n
