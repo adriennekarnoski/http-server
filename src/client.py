@@ -22,10 +22,8 @@ def client_socket(message):
         part = (client.recv(buffer_length)).decode('utf8')
         msg += part
         if part.endswith('*'):
-            print(msg)
+            print(msg[:-1])
             return msg
-            msg = ''
-            break
     client.close()
 
 if __name__ == '__main__':
