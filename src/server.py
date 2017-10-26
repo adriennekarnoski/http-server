@@ -95,7 +95,7 @@ def server():
                     sys.stdout.write(logged_request)
                     msg = ''
                     break
-            conn.close(
+            conn.close()
         except KeyboardInterrupt:
             conn.close()
             server.close()
