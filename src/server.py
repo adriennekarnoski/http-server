@@ -2,6 +2,7 @@
 import socket
 import email.utils
 import sys
+import os
 
 
 def response_error(error):
@@ -73,11 +74,30 @@ def server():
 
 
 def response_ok(uri):
+    import mimetypes
+    import email.utils
+    import os
+    cwd = os.getcwd()
+    path = str(os.path.basename(cwd))
+    if path == 'src':
+        os.chdir('..')
+        os.chdir(path='web_home_directory')
+        print(os.getcwd())
+    elif path == 'http-server':
+        os.chdir(path='web_home_directory')
+        print(os.getcwd())
+    with open(uri[0], 'rb') as file_handle:
+        size = (len(file_handle.read()))
     send_ok_response = """
     HTTP/1.1 200 OK \r\n
     DATE: {} \r\n
-    URI: {} \r\n
-    """.format(email.utils.formatdate(usegmt=True), uri)
+    CONTENT TYPE: {} \r\n
+    CONTENT LENGTH: {} \r\n
+    """.format(
+        email.utils.formatdate(usegmt=True),
+        uri[1],
+        size
+    )
     message = u'{}*'.format(send_ok_response)
     return message
 
