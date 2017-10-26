@@ -7,9 +7,12 @@ import sys
 
 def client_socket(message):
     """Function to send messages to client."""
-    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client.connect(('127.0.0.1', 2200))
-    message = message + '*'
+    client = socket.socket(
+        socket.AF_INET,
+        socket.SOCK_STREAM
+    )
+    client.connect(('127.0.0.1', 2008))
+    message = message + ' *'
     message = u'{}'.format(message)
     client.sendall(message.encode('utf8'))
     buffer_length = 8
@@ -26,6 +29,3 @@ def client_socket(message):
 
 if __name__ == '__main__':
     client_socket(sys.argv[1])
-
-
-
