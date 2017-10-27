@@ -21,7 +21,8 @@ def response_error(error):
 
 
 def parse_request(msg):
-    """Parse the incoming msg to check for proper format, raise appropriate exception."""
+    """Parse the incoming msg to check for proper format,
+    raise appropriate exception."""
     request = msg.split(' ')
     # message_request = [request[0], request[1], request[2]]
     if request[0] == 'CRASH':
@@ -76,7 +77,7 @@ def server():
                     sys.stdout.write(logged_request)
                     msg = ''
                     break
-            conn.close(
+            conn.close()
         except KeyboardInterrupt:
             conn.close()
             server.close()
