@@ -36,7 +36,7 @@ def parse_request(msg):
 
 
 def resolve_uri(uri):
-    """."""
+    """Function that takes requested uri and verifies valid request."""
     os.chdir('..')
     os.chdir('web_home_directory')
     if uri.endswith('/'):
@@ -62,7 +62,7 @@ def resolve_uri(uri):
             result = response_ok((txt, txt_len, extension))
             return result
 
-        
+
 def server():
     """Function for the server."""
     server = socket.socket(
