@@ -26,7 +26,8 @@ def response_error(error_code):
 
 
 def parse_request(msg):
-    """Parse the incoming msg to check for proper format, raise appropriate exception."""
+    """Parse the incoming msg to check for proper format,
+    raise appropriate exception."""
     request = msg.split(' ')
 
     if request[0] == 'CRASH':
@@ -126,7 +127,12 @@ DATE: {date} \r\n
 \r\n
 BODY: \r\n {body}
 \r\n
-    """.format(date=email.utils.formatdate(usegmt=True), type=msg[2], len=msg[1], body=msg[0])
+    """.format(
+        date=email.utils.formatdate(usegmt=True),
+        type=msg[2],
+        len=msg[1],
+        body=msg[0]
+    )
     message = u'{}*'.format(send_ok_response)
     return message
 
