@@ -24,7 +24,6 @@ def parse_request(msg):
     """Parse the incoming msg to check for proper format,
     raise appropriate exception."""
     request = msg.split(' ')
-    # message_request = [request[0], request[1], request[2]]
     if request[0] == 'CRASH':
         raise IOError
     elif request[0] == 'GET' and request[2] == 'HTTP/1.1':
@@ -35,20 +34,19 @@ def parse_request(msg):
     elif request[2] != 'HTTP/1.1':
         raise IndexError
 
-
+        
 def server():
-    """Actual server."""
+    """Function for the server."""
     server = socket.socket(
         socket.AF_INET,
         socket.SOCK_STREAM,
         socket.IPPROTO_TCP
     )
-    server.bind(('127.0.0.1', 2005))
+    server.bind(('127.0.0.1', 2100))
     server.listen(1)
     msg = ''
     buffer_len = 8
     ending = False
-
     while True:
         try:
             conn, addr = server.accept()
@@ -56,24 +54,14 @@ def server():
                 data = (conn.recv(buffer_len)).decode('utf8')
                 msg += data
                 if data.endswith('*'):
-                    try:
-                        message_return = parse_request(msg)[0]
-                    except ValueError:
-                        message_return = response_error('method')
-                    except IndexError:
-                        message_return = response_error('protocol')
-                    except IOError:
-                        message_return = response_error('server')
+                    message_return = response_ok()
                     conn.send(message_return.encode('utf8'))
                     logged_request = """
                     INCOMING REQUEST\r\n
                     REQUEST BODY: {}\r\n
                     FROM: {}\r\n
                     DATE: {}\r\n
-                    """.format(
-                        msg,
-                        addr,
-                        email.utils.formatdate(usegmt=True))
+                    """.format(msg, addr, email.utils.formatdate(usegmt=True))
                     sys.stdout.write(logged_request)
                     msg = ''
                     break

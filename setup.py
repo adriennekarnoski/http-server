@@ -8,5 +8,6 @@ setup(
     author_email='hbao2016@hotmail.com',
     description='http-server from ground up',
     install_requires=[],
-    extras_require={'test': ['pytest', 'pytest-watch', 'pytest-cov', 'tox']},
+    extras_require={'test': ['pytest', 'pytest-watch', 'tox']},
 )
+
