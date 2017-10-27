@@ -9,6 +9,5 @@ setup(
     description='http-server from ground up',
     install_requires=[],
     extras_require={'test': ['pytest', 'pytest-watch', 'tox']},
-    package_dir={"": "src"}
 )
 
