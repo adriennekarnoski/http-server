@@ -17,3 +17,4 @@ install required extras `pip install -e .[test]`
 The client socket used to send requests to the server
 ### server.py
 File for running the server
+
