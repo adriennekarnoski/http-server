@@ -5,41 +5,81 @@ import sys
 import os
 
 
-def response_error(error):
+def response_error(error_code):
+    """Determine and format proper response."""
+    if error_code == '405':
+        error_msg = 'METHOD NOT ALLOWED'
+    elif error_code == '505':
+        error_msg = 'HTTP VERSION NOT SUPPORTED'
+    elif error_code == '500':
+        error_msg = 'INTERNAL SERVER ERROR'
+    elif error_code == '404':
+        error_msg = 'CONTENT NOT FOUND'
     send_error_response = """
     HTTP/1.1 {}\r\n
      DATE: {}\r\n
-    """
+     ERROR: {}\r\n
+    """.format(error_code, email.utils.formatdate(usegmt=True), error_msg)
+
     message = u'{}*'.format(send_error_response)
-    if error == 'method':
-        error_code = '405 METHOD NOT ALLOWED'
-    elif error == 'protocol':
-        error_code = '505 HTTP VERSION NOT SUPPORTED'
-    elif error_code == 'server':
-        error_code = '500 INTERNAL SERVER ERROR'
-    return message.format(error_code, email.utils.formatdate(usegmt=True))
+    return message
 
 
 def parse_request(msg):
+    """Parse the incoming msg to check for proper format, raise appropriate exception."""
     request = msg.split(' ')
-    message_request = [request[0], request[1], request[2]]
-    if request[0] == 'GET' and request[2] == 'HTTP/1.1':
-        message_return = response_ok(request[1])
+
+    if request[0] == 'CRASH':
+        raise ValueError('500')
+    elif request[0] == 'GET' and request[2] == 'HTTP/1.1':
+        uri = request[1]
+        try:
+            message_return = resolve_uri(uri)
+        except IndexError:
+            raise ValueError('404')
+        return [message_return, request]
     elif request[0] != 'GET':
-        message_return = response_error('method')
+        raise ValueError('405')
     elif request[2] != 'HTTP/1.1':
-        message_return = response_error('protocol')
-    return [message_return, message_request]
+        raise ValueError('505')
+
+
+def resolve_uri(uri):
+    """."""
+    os.chdir('..')
+    os.chdir('web_home_directory')
+    if uri.endswith('/'):
+        if not os.path.isdir(uri):
+            raise IndexError
+        else:
+            html_list = [s for s in os.listdir(uri) if s.endswith('.jpg')]
+            html_count = len(html_list)
+            result = response_ok((html_list, html_count, 'HTML LISTING'))
+            return result
+    else:
+        if not os.path.exists(uri):
+            raise IndexError
+        else:
+            # uri_list = uri.split('/')
+            # uri_dir = '/'.join(uri_list[:-1])
+            extension = os.path.splitext(uri)[1]
+            # os.chdir(uri_dir)
+            txt = ''
+            with open(uri, 'r') as f:
+                txt = f.read()
+            txt_len = len(txt)
+            result = response_ok((txt, txt_len, extension))
+            return result
 
 
 def server():
-    """."""
+    """Actual server."""
     server = socket.socket(
         socket.AF_INET,
         socket.SOCK_STREAM,
         socket.IPPROTO_TCP
     )
-    server.bind(('127.0.0.1', 2100))
+    server.bind(('127.0.0.1', 3002))
     server.listen(1)
     msg = ''
     buffer_len = 8
@@ -52,7 +92,10 @@ def server():
                 data = (conn.recv(buffer_len)).decode('utf8')
                 msg += data
                 if data.endswith('*'):
-                    message_return = parse_request(msg)[0]
+                    try:
+                        message_return = parse_request(msg)[0]
+                    except ValueError as err:
+                        message_return = response_error(err.args[0])
                     conn.send(message_return.encode('utf8'))
                     logged_request = """
                     INCOMING REQUEST\r\n
@@ -73,31 +116,17 @@ def server():
             break
 
 
-def response_ok(uri):
-    import mimetypes
-    import email.utils
-    import os
-    cwd = os.getcwd()
-    path = str(os.path.basename(cwd))
-    if path == 'src':
-        os.chdir('..')
-        os.chdir(path='web_home_directory')
-        print(os.getcwd())
-    elif path == 'http-server':
-        os.chdir(path='web_home_directory')
-        print(os.getcwd())
-    with open(uri[0], 'rb') as file_handle:
-        size = (len(file_handle.read()))
+def response_ok(msg):
+    """Send the 200 ok msg if called."""
     send_ok_response = """
-    HTTP/1.1 200 OK \r\n
-    DATE: {} \r\n
-    CONTENT TYPE: {} \r\n
-    CONTENT LENGTH: {} \r\n
-    """.format(
-        email.utils.formatdate(usegmt=True),
-        uri[1],
-        size
-    )
+HTTP/1.1 200 OK \r\n
+FILE TYPE: {type}
+FILE LENGTH:{len}
+DATE: {date} \r\n
+\r\n
+BODY: \r\n {body}
+\r\n
+    """.format(date=email.utils.formatdate(usegmt=True), type=msg[2], len=msg[1], body=msg[0])
     message = u'{}*'.format(send_ok_response)
     return message
 
