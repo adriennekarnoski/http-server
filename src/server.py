@@ -46,16 +46,28 @@ def parse_request(msg):
 
 def resolve_uri(uri):
     """."""
+    os.chdir('..')
+    os.chdir('web_home_directory')
     if uri.endswith('/'):
         if not os.path.isdir(uri):
             raise IndexError
         else:
-            return response_ok(uri)
+            html_list = [s for s in os.listdir(uri) if s.endswith('.jpg')]
+            print(html_list)
+            result = response_ok(('HTML LISTINGS', html_list))
+            return result
     else:
         if not os.path.exists(uri):
             raise IndexError
         else:
-            return response_ok(uri)
+            uri_list = uri.split('/')
+            uri_dir = '/'.join(uri_list[:-1])
+            os.chdir(uri_dir)
+            txt = ''
+            with open('workfile', 'r') as f:
+                txt = f.read()
+            result = response_ok(('FILE CONTENT', txt))
+            return result
 
 
 def server():
@@ -65,7 +77,7 @@ def server():
         socket.SOCK_STREAM,
         socket.IPPROTO_TCP
     )
-    server.bind(('127.0.0.1', 3002))
+    server.bind(('127.0.0.1', 3003))
     server.listen(1)
     msg = ''
     buffer_len = 8
