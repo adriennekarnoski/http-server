@@ -32,7 +32,35 @@ def parse_request(msg):
     elif request[0] != 'GET':
         raise ValueError
     elif request[2] != 'HTTP/1.1':
-        raise IndexError
+        raise ValueError('505')
+
+
+def resolve_uri(uri):
+    """."""
+    os.chdir('..')
+    os.chdir('web_home_directory')
+    if uri.endswith('/'):
+        if not os.path.isdir(uri):
+            raise IndexError
+        else:
+            html_list = [s for s in os.listdir(uri) if s.endswith('.jpg')]
+            html_count = len(html_list)
+            result = response_ok((html_list, html_count, 'HTML LISTING'))
+            return result
+    else:
+        if not os.path.exists(uri):
+            raise IndexError
+        else:
+            # uri_list = uri.split('/')
+            # uri_dir = '/'.join(uri_list[:-1])
+            extension = os.path.splitext(uri)[1]
+            # os.chdir(uri_dir)
+            txt = ''
+            with open(uri, 'r') as f:
+                txt = f.read()
+            txt_len = len(txt)
+            result = response_ok((txt, txt_len, extension))
+            return result
 
         
 def server():
@@ -72,13 +100,22 @@ def server():
             break
 
 
-def response_ok(uri):
+def response_ok(msg):
     """Send the 200 ok msg if called."""
     send_ok_response = """
-    HTTP/1.1 200 OK \r\n
-    DATE: {} \r\n
-    URI: {} \r\n
-    """.format(email.utils.formatdate(usegmt=True), uri)
+HTTP/1.1 200 OK \r\n
+FILE TYPE: {type}
+FILE LENGTH:{len}
+DATE: {date} \r\n
+\r\n
+BODY: \r\n {body}
+\r\n
+    """.format(
+        date=email.utils.formatdate(usegmt=True),
+        type=msg[2],
+        len=msg[1],
+        body=msg[0]
+    )
     message = u'{}*'.format(send_ok_response)
     return message
 
