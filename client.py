@@ -7,23 +7,24 @@ import sys
 
 def client_socket(message):
     """Function to send messages to client."""
-    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client = socket.socket(
+        socket.AF_INET,
+        socket.SOCK_STREAM
+    )
     client.connect(('127.0.0.1', 4000))
+    message = message + ' *'
     message = u'{}'.format(message)
     client.sendall(message.encode('utf8'))
-    buffer_length = 1024
+    buffer_length = 8
     reply_complete = False
+    msg = ''
     while not reply_complete:
-        part = client.recv(buffer_length)
-        return_part = 'this is returned {}'.format(part)
-        print(part.decode('utf8'))
-        if len(part) < buffer_length:
-            break
+        part = (client.recv(buffer_length)).decode('utf8')
+        msg += part
+        if part.endswith('*'):
+            print(msg[:-1])
+            return msg[:-2]
     client.close()
-    return return_part
 
 if __name__ == '__main__':
     client_socket(sys.argv[1])
-
-
-
