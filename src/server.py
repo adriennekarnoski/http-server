@@ -1,9 +1,40 @@
-"""."""
+"""Server function."""
 import socket
 import email.utils
 import sys
 
 
+def response_error(error):
+    """Determine and format proper response."""
+    send_error_response = """
+    HTTP/1.1 {}\r\n
+     DATE: {}\r\n
+    """
+    message = u'{}*'.format(send_error_response)
+    if error == 'method':
+        error_code = '405 METHOD NOT ALLOWED'
+    elif error == 'protocol':
+        error_code = '505 HTTP VERSION NOT SUPPORTED'
+    elif error == 'server':
+        error_code = '500 INTERNAL SERVER ERROR'
+    return message.format(error_code, email.utils.formatdate(usegmt=True))
+
+
+def parse_request(msg):
+    """Parse the incoming msg to check for proper format,
+    raise appropriate exception."""
+    request = msg.split(' ')
+    if request[0] == 'CRASH':
+        raise IOError
+    elif request[0] == 'GET' and request[2] == 'HTTP/1.1':
+        message_return = response_ok(request[1])
+        return [message_return, request]
+    elif request[0] != 'GET':
+        raise ValueError
+    elif request[2] != 'HTTP/1.1':
+        raise IndexError
+
+        
 def server():
     """Function for the server."""
     server = socket.socket(
@@ -35,32 +66,20 @@ def server():
                     msg = ''
                     break
             conn.close()
-        except IndexError:
-            error_message = response_error()
-            conn.send(error_message.encode('utf8'))
         except KeyboardInterrupt:
             conn.close()
             server.close()
             break
 
 
-def response_ok():
-    """Response function return 200 OK message."""
+def response_ok(uri):
+    """Send the 200 ok msg if called."""
     send_ok_response = """
     HTTP/1.1 200 OK \r\n
     DATE: {} \r\n
-    """.format(email.utils.formatdate(usegmt=True))
+    URI: {} \r\n
+    """.format(email.utils.formatdate(usegmt=True), uri)
     message = u'{}*'.format(send_ok_response)
-    return message
-
-
-def response_error():
-    """Response function returns error message."""
-    send_error_response = """
-    HTTP/1.1 500 INTERNAL SERVER ERROR<CRLF>
-     DATE: {} \r\n
-    """.format(email.utils.formatdate(usegmt=True))
-    message = u'{}*'.format(send_error_response)
     return message
 
 
