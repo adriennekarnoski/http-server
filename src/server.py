@@ -53,20 +53,22 @@ def resolve_uri(uri):
             raise IndexError
         else:
             html_list = [s for s in os.listdir(uri) if s.endswith('.jpg')]
-            print(html_list)
-            result = response_ok(('HTML LISTINGS', html_list))
+            html_count = len(html_list)
+            result = response_ok((html_list, html_count, 'HTML LISTING'))
             return result
     else:
         if not os.path.exists(uri):
             raise IndexError
         else:
-            uri_list = uri.split('/')
-            uri_dir = '/'.join(uri_list[:-1])
-            os.chdir(uri_dir)
+            # uri_list = uri.split('/')
+            # uri_dir = '/'.join(uri_list[:-1])
+            extension = os.path.splitext(uri)[1]
+            # os.chdir(uri_dir)
             txt = ''
-            with open('workfile', 'r') as f:
+            with open(uri, 'r') as f:
                 txt = f.read()
-            result = response_ok(('FILE CONTENT', txt))
+            txt_len = len(txt)
+            result = response_ok((txt, txt_len, extension))
             return result
 
 
@@ -77,7 +79,7 @@ def server():
         socket.SOCK_STREAM,
         socket.IPPROTO_TCP
     )
-    server.bind(('127.0.0.1', 3003))
+    server.bind(('127.0.0.1', 3002))
     server.listen(1)
     msg = ''
     buffer_len = 8
@@ -114,13 +116,17 @@ def server():
             break
 
 
-def response_ok(uri):
+def response_ok(msg):
     """Send the 200 ok msg if called."""
     send_ok_response = """
-    HTTP/1.1 200 OK \r\n
-    DATE: {} \r\n
-    URI: {} \r\n
-    """.format(email.utils.formatdate(usegmt=True), uri)
+HTTP/1.1 200 OK \r\n
+FILE TYPE: {type}
+FILE LENGTH:{len}
+DATE: {date} \r\n
+\r\n
+BODY: \r\n {body}
+\r\n
+    """.format(date=email.utils.formatdate(usegmt=True), type=msg[2], len=msg[1], body=msg[0])
     message = u'{}*'.format(send_ok_response)
     return message
 
