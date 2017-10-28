@@ -32,21 +32,21 @@ def response_error(error_code):
 def parse_request(msg):
     """Parse the incoming msg to check for proper format, raise appropriate exception."""
     request = msg.split(' ')
-    if len(request) != 4:
+    if len(request) != 5:
         raise ValueError('410')
     elif request[0] != 'GET':
         raise ValueError('405')
     elif request[2] != 'HTTP/1.1':
         raise ValueError('505')
-    elif request[3] != 'HOST:':
+    elif request[3] != 'Host:':
         raise ValueError('400')
-    elif request[0] == 'GET' and request[2] == 'HTTP/1.1' and request[4] == 'HOST:':
+    elif request[0] == 'GET' and request[2] == 'HTTP/1.1' and request[3] == 'Host:':
         try:
             uri = request[1]
             message_return = resolve_uri(uri)
+            return [message_return, request]
         except IndexError:
             raise ValueError('404')
-        return [message_return, request]
 
 
 def resolve_uri(uri):
@@ -105,7 +105,7 @@ def handle_conn(conn, addr):
 def server():
     """Create the stream server."""
     try:
-        stream = StreamServer(('127.0.0.1', 3000), handle_conn)
+        stream = StreamServer(('127.0.0.1', 3001), handle_conn)
         stream.serve_forever()
     except KeyboardInterrupt:
         pass
