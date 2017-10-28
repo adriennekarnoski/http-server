@@ -1,5 +1,3 @@
-import pytest
-
 
 def test_shorter():
     """."""
@@ -12,7 +10,7 @@ def test_longer():
     """."""
     from client import client_socket
     msg = client_socket('12345678910')
-    assert msg == '12345678\910*'
+    assert msg == '12345678910*'
 
 
 def test_exact():

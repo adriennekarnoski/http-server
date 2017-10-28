@@ -10,19 +10,22 @@ def server():
     msg = ''
     buffer_len = 8
     ending = False
-    conn, addr = server.accept()
 
-    while not ending:
+    while True:
         try:
-            data = (conn.recv(buffer_len)).decode('utf8')
-            msg += data
-            if data.endswith('*'):
-                conn.send(msg.encode('utf8'))
-                print(msg)
-                msg = ''
-                break
+            conn, addr = server.accept()
+            while not ending:
+                data = (conn.recv(buffer_len)).decode('utf8')
+                msg += data
+                if data.endswith('*'):
+                    conn.send(msg.encode('utf8'))
+                    print(msg)
+                    msg = ''
+                    break
+            conn.close()
         except KeyboardInterrupt:
-            break
+            conn.close()
+            server.close()
 
 
 if __name__ == '__main__':
