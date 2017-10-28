@@ -7,8 +7,8 @@ from server import parse_request
 
 def test_response_message_response():
     """Testing for ok msg function."""
-    ok_message = response_ok('/URI')
-    assert ok_message[5:20] == 'HTTP/1.1 200 OK'
+    ok_message = response_ok((1, 2, 3))
+    assert ok_message[:15] == 'HTTP/1.1 200 OK'
 
 
 def test_405_error_message_response():
@@ -20,7 +20,7 @@ def test_405_error_message_response():
 
 # def test_200_message_response():
 #     """Testing for if 200 ok is triggered."""
-#     returned = client_socket('GET /URI HTTP/1.1')
+#     returned = client_socket('GET /URI HTTP/1.1 HOST:')
 #     ok_message = response_ok('/URI')
 #     assert returned == ok_message
 
@@ -32,10 +32,10 @@ def test_505_error_message_response():
     assert returned == error_message
 
 
-def test_500_error_message_respoonse():
+def test_400_error_message_respoonse():
     """Testing if 500 error is triggered."""
-    returned = client_socket('CRASH GET /URI HTTP/1.1')
-    error_message = response_error('500')
+    returned = client_socket('GET /URI HTTP/1.1')
+    error_message = response_error('400')
     assert returned == error_message
 
 

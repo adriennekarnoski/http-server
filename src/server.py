@@ -15,6 +15,10 @@ def response_error(error_code):
         error_msg = 'INTERNAL SERVER ERROR'
     elif error_code == '404':
         error_msg = 'CONTENT NOT FOUND'
+    elif error_code == '400':
+        error_msg = 'HOST NEEDED'
+    elif error_code == '410':
+        error_msg = 'PROPERLY FORMATTED REQUEST NEEDED'
     send_error_response = """
     HTTP/1.1 {}\r\n
      DATE: {}\r\n
@@ -28,24 +32,25 @@ def response_error(error_code):
 def parse_request(msg):
     """Parse the incoming msg to check for proper format, raise appropriate exception."""
     request = msg.split(' ')
-
-    if request[0] == 'CRASH':
-        raise ValueError('500')
-    elif request[0] == 'GET' and request[2] == 'HTTP/1.1':
-        uri = request[1]
-        try:
-            message_return = resolve_uri(uri)
-        except IndexError:
-            raise ValueError('404')
-        return [message_return, request]
+    if len(request) != 4:
+        raise ValueError('410')
     elif request[0] != 'GET':
         raise ValueError('405')
     elif request[2] != 'HTTP/1.1':
         raise ValueError('505')
+    elif request[3] != 'HOST:':
+        raise ValueError('400')
+    elif request[0] == 'GET' and request[2] == 'HTTP/1.1' and request[4] == 'HOST:':
+        try:
+            uri = request[1]
+            message_return = resolve_uri(uri)
+        except IndexError:
+            raise ValueError('404')
+        return [message_return, request]
 
 
 def resolve_uri(uri):
-    """."""
+    """Take the uri and returns content and infos."""
     os.chdir('..')
     os.chdir('web_home_directory')
     if uri.endswith('/'):
@@ -108,13 +113,12 @@ def server():
 
 def response_ok(msg):
     """Send the 200 ok msg if called."""
-    send_ok_response = """
-HTTP/1.1 200 OK \r\n
+    send_ok_response = """HTTP/1.1 200 OK \r\n
 FILE TYPE: {type}
 FILE LENGTH:{len}
-DATE: {date} \r\n
-\r\n
-BODY: \r\n {body}
+DATE: {date}
+\r\n \r\n
+{body}
 \r\n
     """.format(date=email.utils.formatdate(usegmt=True), type=msg[2], len=msg[1], body=msg[0])
     message = u'{}*'.format(send_ok_response)
