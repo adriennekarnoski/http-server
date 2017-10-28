@@ -57,7 +57,7 @@ def resolve_uri(uri):
         if not os.path.isdir(uri):
             raise IndexError
         else:
-            html_list = [s for s in os.listdir(uri) if s.endswith('.jpg')]
+            html_list = [s for s in os.listdir(uri)]
             html_count = len(html_list)
             result = response_ok((html_list, html_count, 'HTML LISTING'))
             return result
