@@ -16,3 +16,11 @@ def test_message_is_length_return_is_same_as_sent():
     message_sent = client_socket('message')
     message_length = len(message_sent)
     assert message_length == len(message_sent)
+
+
+
+# It's still looking at the tests you have commented out for your echo step
+# ----------------------------------------------------------
+#  SyntaxError: Non-ASCII character '\xc3' in file /Users/bonana/401TA/adrienne_karnoski/http-server/src/test_servers.py on line 39, but no encoding declared; see http://python.org/dev/peps/pep-0263/ for details
+# ------------------------------------------------------------
+# When I comment it out it's will run your tests with pytest, but your tests are not passing completely.
