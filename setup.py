@@ -10,3 +10,4 @@ setup(
     install_requires=['gevent==1.1.0', 'greenlet==0.4.9'],
     extras_require={'test': ['pytest', 'pytest-watch', 'pytest-cov', 'tox']},
 )
+

@@ -102,6 +102,7 @@ def handle_conn(conn, addr):
             break
 
 
+
 def server():
     """Create the stream server."""
     try:
@@ -109,7 +110,6 @@ def server():
         stream.serve_forever()
     except KeyboardInterrupt:
         pass
-
 
 def response_ok(msg):
     """Send the 200 ok msg if called."""

@@ -23,7 +23,7 @@ def client_socket(message):
         msg += part
         if part.endswith('*'):
             print(msg[:-1])
-            return msg
+            return msg[:-2]
     client.close()
 
 if __name__ == '__main__':
